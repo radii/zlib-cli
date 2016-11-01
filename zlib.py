@@ -23,12 +23,20 @@ def main(args):
         outfile = sys.stdout
 
     if opts.decompress:
-        op = zlib.decompress
+        obj = zlib.decompressobj()
+        op = lambda s: obj.decompress(s)
     else:
-        op = zlib.compress
+        obj = zlib.compressobj()
+        op = lambda s: obj.compress(s)
 
-    outfile.write(op(infile.read()))
-
+    while True:
+        b = infile.read(1024 * 1024)
+        if b:
+            outfile.write(op(b))
+        else:
+            break
+    outfile.write(obj.flush())
+    outfile.close()
 
 if __name__ == '__main__':
     main(sys.argv[1:])
